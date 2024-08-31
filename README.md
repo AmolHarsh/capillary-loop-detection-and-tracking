@@ -1,6 +1,6 @@
 # Capillary Loop Detection and Tracking
 
-This is a Streamlit-powered application designed as a prototype to demonstrate the capabilities of utilizing the latest object detection tools in capillary analysis. By leveraging the YOLO (You Only Look Once) object detection model, MedCap provides a user-friendly interface for analyzing capillary structures in medical images and videos.
+This is a Streamlit-powered application designed as a prototype to demonstrate the capabilities of utilizing the latest object detection tools in capillary analysis. By leveraging the YOLO (You Only Look Once) object detection model, it provides a user-friendly interface for analyzing capillary structures in medical images and videos.
 
 ## Project Purpose
 
