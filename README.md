@@ -10,7 +10,7 @@ This project serves as a prototype to showcase how advanced object detection mod
 
 - **Image and Video Processing**: Upload medical images or videos for automated capillary loop detection.
 - **Real-time Object Tracking**: Track capillary loops across video frames.
-- **Downloadable Results**: Save processed images and videos with detected loops highlighted.
+- **Downloadable Results**: Save processed videos with detected loops highlighted.
 - **Adjustable Thresholds**: Customize confidence and IOU thresholds for optimal detection and tracking.
 
 ## Getting Started
