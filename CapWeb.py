@@ -12,7 +12,7 @@ import torch
 device = torch.device("cpu")
 
 # Load the model using Ultralytics
-model = YOLO('/Users/apple/Downloads/trained_models/yolov10s/yolov10s_results/weights/best.pt').to(device)
+model = YOLO('models/best.pt').to(device)
 
 
 # Define the prediction function for images
