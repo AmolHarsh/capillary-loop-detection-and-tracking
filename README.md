@@ -2,6 +2,8 @@
 
 This is a Streamlit-powered application designed as a prototype to demonstrate the capabilities of utilizing the latest object detection tools in capillary analysis. By leveraging the YOLO (You Only Look Once) object detection model, it provides a user-friendly interface for analyzing capillary structures in medical images and videos.
 
+**Note:** This project is still a work in progress and is part of a research project at the University of California, San Diego (UCSD).
+
 ## Project Purpose
 
 This project serves as a prototype to showcase how advanced object detection models like YOLO can be applied to the analysis of capillary loops in medical imaging. It is intended for research and educational purposes to explore the potential of AI in medical diagnostics.
@@ -27,7 +29,7 @@ Ensure you have the following installed:
 1. **Clone the repository**:
     ```bash
     git clone https://github.com/AmolHarsh/capillary-loop-detection-and-tracking.git
-    cd medcap
+    cd capillary-loop-detection-and-tracking
     ```
 
 2. **Install the required dependencies**:
