@@ -74,9 +74,9 @@ streamlit==1.38.0
 sympy==1.13.1
 tenacity==8.5.0
 toml==0.10.2
-torch==2.5.0.dev20240822
-torchaudio==2.4.0.dev20240822
-torchvision==0.20.0.dev20240822
+torch==2.0.1
+torchaudio==2.0.1
+torchvision==0.15.2
 tornado==6.4.1
 tqdm==4.66.5
 traitlets==5.14.3
