@@ -26,7 +26,7 @@ Ensure you have the following installed:
 
 1. **Clone the repository**:
     ```bash
-    git clone https://github.com/yourusername/medcap.git
+    git clone https://github.com/AmolHarsh/capillary-loop-detection-and-tracking.git
     cd medcap
     ```
 
