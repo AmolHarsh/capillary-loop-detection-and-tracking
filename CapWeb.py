@@ -14,15 +14,54 @@ device = torch.device("cpu")
 # Load the model using Ultralytics
 model = YOLO('models/best.pt').to(device)
 
+# Function to calculate Intersection over Union (IoU)
+def calculate_iou(box1, box2):
+    x1_max = max(box1[0], box2[0])
+    y1_max = max(box1[1], box2[1])
+    x2_min = min(box1[2], box2[2])
+    y2_min = min(box1[3], box2[3])
+
+    inter_area = max(0, x2_min - x1_max + 1) * max(0, y2_min - y1_max + 1)
+
+    box1_area = (box1[2] - box1[0] + 1) * (box1[3] - box1[1] + 1)
+    box2_area = (box2[2] - box2[0] + 1) * (box2[3] - box2[1] + 1)
+
+    iou = inter_area / float(box1_area + box2_area - inter_area)
+    return iou
+
+# Function to filter overlapping boxes and keep the smallest
+def filter_boxes(boxes, confidences, iou_threshold=0.5):
+    keep_boxes = []
+    keep_confidences = []
+
+    while len(boxes) > 0:
+        smallest_box_idx = np.argmin([(box[2] - box[0]) * (box[3] - box[1]) for box in boxes])
+        smallest_box = boxes[smallest_box_idx]
+        smallest_confidence = confidences[smallest_box_idx]
+
+        keep = True
+        for i in range(len(keep_boxes)):
+            iou = calculate_iou(smallest_box, keep_boxes[i])
+            if iou > iou_threshold:
+                keep = False
+                break
+
+        if keep:
+            keep_boxes.append(smallest_box)
+            keep_confidences.append(smallest_confidence)
+
+        # Remove the smallest box from the list
+        boxes = np.delete(boxes, smallest_box_idx, axis=0)
+        confidences = np.delete(confidences, smallest_box_idx, axis=0)
+
+    return np.array(keep_boxes), np.array(keep_confidences)
 
 # Define the prediction function for images
 def predict(image):
-    
     start_time = time.time()  # Start timing
     results = model(image)  # Perform inference
     inference_time = time.time() - start_time  # Calculate inference time
     return results, inference_time
-
 
 # Function to trim video to the first 30 seconds
 def trim_video(video_path, max_duration=5):
@@ -49,15 +88,24 @@ def trim_video(video_path, max_duration=5):
 # Function to draw bounding boxes with confidence scores on an image
 def draw_boxes_with_confidence(image, results):
     image_np = np.array(image)
+    total_capillaries = 0  # Initialize capillary count
     for result in results:
         if result.boxes is not None:
             boxes = result.boxes.xyxy.cpu().numpy()  # Get the bounding boxes
             confidences = result.boxes.conf.cpu().numpy()  # Get confidence scores
+            
+            # Filter overlapping boxes
+            boxes, confidences = filter_boxes(boxes, confidences)
+            
+            # Update the number of capillaries detected
+            total_capillaries += len(boxes)
+
             for box, conf in zip(boxes, confidences):
                 x1, y1, x2, y2 = map(int, box)
                 cv2.rectangle(image_np, (x1, y1), (x2, y2), (255, 0, 0), 1)  # Red box
                 cv2.putText(image_np, f'{conf:.2f}', (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 1)
-    return image_np
+    
+    return image_np, total_capillaries
 
 # Function to process and annotate video frames with progress tracking
 def process_video(video_path):
@@ -76,6 +124,7 @@ def process_video(video_path):
     progress_bar = st.progress(0)  # Initialize the progress bar
     progress_text = st.empty()  # Placeholder for the progress percentage text
 
+    total_capillaries = 0  # Initialize capillary count for the entire video
     current_frame = 0
     while cap.isOpened():
         ret, frame = cap.read()
@@ -83,10 +132,13 @@ def process_video(video_path):
             break
 
         # Apply the YOLO model with tracking on the frame
-        results = model.track(frame, conf=0.08, iou = 0.3)
+        results = model.track(frame, conf=0.08, iou=0.5)
 
         # Annotate the frame with tracking results
-        annotated_frame = draw_boxes_with_confidence(frame, results)
+        annotated_frame, capillaries_in_frame = draw_boxes_with_confidence(frame, results)
+        
+        # Update the total number of capillaries detected
+        total_capillaries = max(total_capillaries, capillaries_in_frame)
 
         # Write the annotated frame to the output video
         out.write(annotated_frame)
@@ -101,7 +153,7 @@ def process_video(video_path):
     cap.release()
     out.release()
 
-    return output_video_path
+    return output_video_path, total_capillaries
 
 # Streamlit app
 st.title('Capillary Loop Detection and Tracking')
@@ -131,7 +183,10 @@ if upload_type == "Image":
                 st.write('Predicted Results:')
                 if result.boxes is not None:
                     # Annotate image with bounding boxes and confidence values
-                    annotated_image = draw_boxes_with_confidence(image, [result])
+                    annotated_image, total_capillaries = draw_boxes_with_confidence(image, [result])
+
+                    # Display the number of capillaries detected
+                    st.write(f"Number of capillaries detected: {total_capillaries}")
 
                     # Convert the annotated numpy image back to PIL format for display
                     annotated_image = Image.fromarray(annotated_image)
@@ -154,7 +209,11 @@ elif upload_type == "Video":
             trimmed_video_path = trim_video(tfile.name)
 
             # Process the trimmed video for tracking with progress bar
-            output_video_path = process_video(trimmed_video_path)
+            output_video_path, total_capillaries = process_video(trimmed_video_path)
+            
+            # Display the number of capillaries detected in the entire video
+            st.write(f"Maximum number of capillaries detected in a frame: {total_capillaries}")
+            
             
             # Ensure the video is fully written before trying to download it
             if os.path.exists(output_video_path):
