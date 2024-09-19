@@ -12,7 +12,7 @@ import torch
 device = torch.device("cpu")
 
 # Load the model using Ultralytics
-model = YOLO('models/best.pt').to(device)
+model = YOLO('models/bestNano.pt').to(device)
 
 # Function to calculate Intersection over Union (IoU)
 def calculate_iou(box1, box2):
