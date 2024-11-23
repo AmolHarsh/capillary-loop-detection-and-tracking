@@ -87,8 +87,10 @@ def trim_video(video_path, max_duration=5):
 
 # Function to draw bounding boxes with confidence scores on an image
 def draw_boxes_with_confidence(image, results):
-    image_np = np.array(image)
+    image_np = np.array(image.convert('RGB'))  # Convert to RGB format
+    height, width = image_np.shape[:2]
     total_capillaries = 0  # Initialize capillary count
+
     for result in results:
         if result.boxes is not None:
             boxes = result.boxes.xyxy.cpu().numpy()  # Get the bounding boxes
@@ -97,14 +99,16 @@ def draw_boxes_with_confidence(image, results):
             # Filter overlapping boxes
             boxes, confidences = filter_boxes(boxes, confidences)
             
-            # Update the number of capillaries detected
             total_capillaries += len(boxes)
-            count = 0
             for box, conf in zip(boxes, confidences):
-                count += 1
                 x1, y1, x2, y2 = map(int, box)
-                cv2.rectangle(image_np, (x1, y1), (x2, y2), (255, 0, 0), 1)  
-                cv2.putText(image_np, f'{count}', (x1, y1 - 3), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 100), 1)
+                x1, y1 = max(0, x1), max(0, y1)
+                x2, y2 = min(width - 1, x2), min(height - 1, y2)
+
+                # Draw the bounding box
+                cv2.rectangle(image_np, (x1, y1), (x2, y2), (255, 0, 0), 1)
+                # Draw the confidence value
+                cv2.putText(image_np, f'{conf:.2f}', (x1, y1 - 3), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 100), 1)
     
     return image_np, total_capillaries
 
