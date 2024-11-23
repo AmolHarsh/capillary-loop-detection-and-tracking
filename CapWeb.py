@@ -103,8 +103,8 @@ def draw_boxes_with_confidence(image, results):
             for box, conf in zip(boxes, confidences):
                 count += 1
                 x1, y1, x2, y2 = map(int, box)
-                cv2.rectangle(image_np, (x1, y1), (x2, y2), (255, 0, 0), 1)  # Red box
-                cv2.putText(image_np, f'{count}', (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.2, (255, 0, 0), 1)
+                cv2.rectangle(image_np, (x1, y1), (x2, y2), (255, 255, 0), 1)  
+                cv2.putText(image_np, f'{count}', (x1, y1 - 3), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255, 0, 255), 1)
     
     return image_np, total_capillaries
 
