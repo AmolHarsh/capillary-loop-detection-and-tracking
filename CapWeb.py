@@ -85,9 +85,13 @@ def trim_video(video_path, max_duration=5):
     out.release()
     return output_video_path
 
-# Function to draw bounding boxes with confidence scores on an image
 def draw_boxes_with_confidence(image, results):
-    image_np = np.array(image.convert('RGB'))  # Convert to RGB format
+    # Check if the input is a PIL image or a numpy array
+    if isinstance(image, np.ndarray):
+        image_np = image  # Already a numpy array
+    else:
+        image_np = np.array(image.convert('RGB'))  # Convert PIL image to numpy array
+
     height, width = image_np.shape[:2]
     total_capillaries = 0  # Initialize capillary count
 
@@ -111,6 +115,7 @@ def draw_boxes_with_confidence(image, results):
                 cv2.putText(image_np, f'{conf:.2f}', (x1, y1 - 3), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 100), 1)
     
     return image_np, total_capillaries
+
 
 # Function to process and annotate video frames with progress tracking
 def process_video(video_path):
